@@ -18,7 +18,7 @@ namespace Curso.api.Controllers
     public class UsuarioController : ControllerBase
     {
         /// <summary>
-        /// teste
+        /// Seviço que permite autenticar um usuário cadastrado e ativo
         /// </summary>
         /// <param name="loginViewModelInput">View model do login</param>
         /// <returns>Retona status ok, dados do usuario e o token em caso de sucesso</returns>
