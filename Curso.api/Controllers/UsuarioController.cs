@@ -10,6 +10,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Curso.api.Model;
+using Curso.api.Infraestruture.Data;
+using Microsoft.EntityFrameworkCore;
+using Curso.api.Business.Etities;
 
 namespace Curso.api.Controllers
 {
@@ -71,6 +74,19 @@ namespace Curso.api.Controllers
         [ValidacaoModelStateCustomizado]
         public IActionResult Registrar(RegistroViewModelInput loginViewModelInput)
         {
+
+            var optionsBuilder = new DbContextOptionsBuilder<CursoDbContext>();
+            optionsBuilder.UseSqlServer("Server=Home;Database=CURSO;Trusted_Connection=True;");
+            CursoDbContext contexto = new CursoDbContext(optionsBuilder.Options);
+
+            var usuario = new Usuario();
+            usuario.Login = loginViewModelInput.Login;
+            usuario.Senha = loginViewModelInput.Senha;
+            usuario.Email = loginViewModelInput.Email;
+            contexto.Usuario.Add(usuario);
+            contexto.SaveChanges();
+
+
             return Created("", loginViewModelInput);
         }
     }
