@@ -1,18 +1,17 @@
-﻿using Curso.api.filters;
+﻿using Curso.api.Business.Etities;
+using Curso.api.filters;
+using Curso.api.Infraestruture.Data;
+using Curso.api.Model;
 using Curso.api.Model.Usuarios;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
-using System.IO;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using Curso.api.Model;
-using Curso.api.Infraestruture.Data;
-using Microsoft.EntityFrameworkCore;
-using Curso.api.Business.Etities;
 
 namespace Curso.api.Controllers
 {
@@ -69,6 +68,15 @@ namespace Curso.api.Controllers
             });
             
         }
+
+        /// <summary>
+        /// Seviço que permite cadastrar um usuário cadastrado não existemte.
+        /// </summary>
+        /// <param name="loginViewModelInput">View model de registro de login</param>
+        /// <returns>Retona status ok, dados do usuario e o token em caso de sucesso</returns>
+        [SwaggerResponse(statusCode: 200, description: "Sucesso ou autenticar", Type = typeof(LoginViewModelInput))]
+        [SwaggerResponse(statusCode: 400, description: "Campos obrigatorios", Type = typeof(ValdaCampoViewModelOutput))]
+        [SwaggerResponse(statusCode: 500, description: "Erro interno", Type = typeof(ErroGenericoViewModel))]
         [HttpPost]
         [Route("registrar")]
         [ValidacaoModelStateCustomizado]
@@ -78,6 +86,13 @@ namespace Curso.api.Controllers
             var optionsBuilder = new DbContextOptionsBuilder<CursoDbContext>();
             optionsBuilder.UseSqlServer("Server=Home;Database=CURSO;Trusted_Connection=True;");
             CursoDbContext contexto = new CursoDbContext(optionsBuilder.Options);
+
+            var migracoesPendentes = contexto.Database.GetPendingMigrations();
+
+            if (migracoesPendentes.Count() > 0)
+            {
+                contexto.Database.Migrate();
+            }
 
             var usuario = new Usuario();
             usuario.Login = loginViewModelInput.Login;
