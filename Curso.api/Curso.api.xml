@@ -23,5 +23,12 @@
             <param name="loginViewModelInput">View model do login</param>
             <returns>Retona status ok, dados do usuario e o token em caso de sucesso</returns>
         </member>
+        <member name="M:Curso.api.Controllers.UsuarioController.Registrar(Curso.api.Model.Usuarios.RegistroViewModelInput)">
+            <summary>
+            Seviço que permite cadastrar um usuário cadastrado não existemte.
+            </summary>
+            <param name="loginViewModelInput">View model de registro de login</param>
+            <returns>Retona status ok, dados do usuario e o token em caso de sucesso</returns>
+        </member>
     </members>
 </doc>

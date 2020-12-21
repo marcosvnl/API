@@ -1,8 +1,11 @@
-﻿using Curso.api.Model.Cursos;
+﻿using Curso.api.Business.Etities;
+using Curso.api.Business.Repositories;
+using Curso.api.Model.Cursos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -13,6 +16,13 @@ namespace Curso.api.Controllers
     [Authorize] // forçar atenticação para a uso da API
     public class CursoController : ControllerBase
     {
+        private readonly ICursoRepository _cursoRepository;
+
+        public CursoController(ICursoRepository cursoRepository)
+        {
+            _cursoRepository = cursoRepository;
+        }
+
         /// <summary>
         /// Este serviço permite cadastrar cursos para o usuário autenticado.
         /// </summary>
@@ -23,7 +33,13 @@ namespace Curso.api.Controllers
         [Route("")]
         public async Task<IActionResult> Post(CursoViewModelInput cursoViewModelInput)
         {
-            //var CodigoUsuario = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            Cursos cursos = new Cursos();
+            cursos.Nome = cursoViewModelInput.Nome;
+            cursos.Descricao = cursoViewModelInput.Descricao;
+            var CodigoUsuario = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            cursos.CodigoUsuario = CodigoUsuario;
+            _cursoRepository.Adicionar(cursos);
+            _cursoRepository.Commit();
             return Created("", cursoViewModelInput);
         }
 
@@ -35,16 +51,17 @@ namespace Curso.api.Controllers
         [Route("")]
         public async Task<IActionResult> Get()
         {
-            var cursos = new List<CursoViewmodelOutput>();
+            
             var codigoUsuario = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            cursos.Add(new CursoViewmodelOutput()
-            {
-                Login = codigoUsuario.ToString(),
-                Descricao = "Teste API",
-                Nome = "Marcos Vinicius"
+            var cursos = _cursoRepository.ObterPorUsuario(codigoUsuario)
+                .Select(s => new CursoViewmodelOutput()
+                {
+                    Nome = s.Nome,
+                    Descricao = s.Descricao,
+                    Login =s.Usuario.Login
+                });
 
-            });
-            return Ok(cursos);
+                return Ok(cursos);
         }
     } 
 }
